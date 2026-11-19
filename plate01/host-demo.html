@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mr. Aly · Plate 01 host</title>
+<link rel="icon" href="data:,">
+<style>
+  /* A reference host: how the Cinematic Tutor app embeds a plate, drives it, and listens to it.
+     Mr. Aly speaks the plate's own narration lines; the plate's narration bar is hidden (?narration=host). */
+  :root { --paper: #EEE9DC; --deep: #E4DECE; --ink: #1C1B19; --soft: #5E5A51; --rule: #B9B2A2; --red: #C8102E; --green: #4E7D6B;
+    --ar: "Amiri", "Noto Naskh Arabic", serif; --ui: "Segoe UI", Tahoma, sans-serif; --mono: Menlo, Consolas, monospace; color-scheme: light; }
+  html, body { height: 100%; margin: 0; }
+  body { background: var(--paper); color: var(--ink); font-family: var(--ui); font-size: 13px; display: grid; grid-template-columns: minmax(0, 1fr) 300px; }
+  iframe { width: 100%; height: 100%; border: 0; display: block; }
+  aside { border-inline-start: 1px solid var(--ink); display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto; min-height: 0; }
+  header { padding: 10px 14px; border-bottom: 1px solid var(--ink); }
+  header h1 { margin: 0; font-family: var(--ar); font-size: 26px; }
+  header p { margin: 2px 0 0; color: var(--soft); font-size: 11px; direction: ltr; text-align: right; }
+  .aly { padding: 12px 14px; border-bottom: 1px solid var(--ink); display: grid; grid-template-columns: 56px minmax(0, 1fr); gap: 10px; align-items: start; }
+  .face { width: 56px; height: 56px; border-radius: 50%; background: var(--ink); color: var(--paper); display: grid; place-items: center; font-family: var(--ar); font-size: 22px; position: relative; }
+  .face.talking::after { content: ""; position: absolute; inset: -4px; border: 2px solid var(--red); border-radius: 50%; animation: pulse 0.9s ease-in-out infinite; }
+  @keyframes pulse { 50% { transform: scale(1.08); opacity: .4; } }
+  @media (prefers-reduced-motion: reduce) { .face.talking::after { animation: none; } }
+  .line-ar { font-family: var(--ar); font-size: 17px; line-height: 1.5; margin: 0; min-height: 52px; }
+  .line-en { margin: 2px 0 0; font-style: italic; color: var(--soft); font-size: 12px; direction: ltr; text-align: right; }
+  .ctl { padding: 10px 14px; border-bottom: 1px solid var(--ink); display: grid; gap: 8px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  button { font: inherit; border: 1px solid var(--ink); background: var(--paper); padding: 3px 10px; cursor: pointer; }
+  button.primary { background: var(--red); border-color: var(--red); color: var(--paper); font-weight: 600; }
+  button:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+  .step { font-size: 12px; color: var(--soft); }
+  .bar { height: 6px; background: var(--deep); border: 1px solid var(--ink); }
+  .bar i { display: block; height: 100%; background: var(--red); width: 0; transition: width .4s; }
+  .log { overflow: auto; padding: 8px 14px; font-family: var(--mono); font-size: 10.5px; direction: ltr; text-align: left; line-height: 1.45; min-height: 0; }
+  .log div { border-bottom: 1px dotted var(--rule); padding: 1px 0; white-space: pre-wrap; word-break: break-word; }
+  .log .in { color: var(--green); } .log .out { color: var(--red); }
+  footer { padding: 6px 14px; border-top: 1px solid var(--ink); font-size: 10.5px; color: var(--soft); }
+  label { display: inline-flex; gap: 4px; align-items: center; }
+  @media (max-width: 860px) { body { grid-template-columns: minmax(0, 1fr); grid-template-rows: 70vh auto; height: auto; } aside { border-inline-start: 0; border-top: 1px solid var(--ink); } .log { max-height: 240px; } }
+</style>
+</head>
+<body>
+<iframe id="plate" src="./?narration=host" title="لوحة الميكروفون" allow="microphone; autoplay"></iframe>
+<aside aria-label="مستر علي">
+  <header>
+    <h1>مستر علي يشرح اللوحة ٠١</h1>
+    <p>Reference host: embeds the plate, drives it with postMessage, speaks its lines.</p>
+  </header>
+  <div class="aly">
+    <div class="face" id="face" aria-hidden="true">ع</div>
+    <div><p class="line-ar" id="say-ar" aria-live="polite">اضغط «ابدأ الشرح».</p><p class="line-en" id="say-en">Press Start.</p></div>
+  </div>
+  <div class="ctl">
+    <div class="row">
+      <button class="primary" id="start" type="button">ابدأ الشرح</button>
+      <button id="next" type="button" disabled>التالي</button>
+      <label><input type="checkbox" id="voice"> صوت مستر علي (تجريبي)</label>
+    </div>
+    <div class="step" id="step">الخطوة 0 من 9</div>
+    <div class="row" style="justify-content:space-between"><span>تقدّم الطالب</span><span id="prog" style="font-family:var(--mono)">0/6</span></div>
+    <div class="bar"><i id="bar"></i></div>
+  </div>
+  <div class="log" id="log" aria-label="Message log"></div>
+  <footer>الصوت التجريبي من المتصفح نفسه. في التطبيق يتكلم صوت مستر علي الحقيقي بنفس النصوص.</footer>
+</aside>
+<script>
+const frame = document.getElementById('plate');
+const logEl = document.getElementById('log');
+const log = (cls, obj) => { const d = document.createElement('div'); d.className = cls; d.textContent = (cls === 'in' ? '← ' : '→ ') + JSON.stringify(obj); logEl.prepend(d); while (logEl.children.length > 120) logEl.lastChild.remove(); };
+
+// ---- the bridge, host side ----
+let seq = 0; const pending = new Map();
+function send(action, ...args) {
+  const id = ++seq; const msg = { target: 'ct-plate', id, action, args };
+  log('out', msg); frame.contentWindow.postMessage(msg, '*');
+  return new Promise((res, rej) => pending.set(id, { res, rej }));
+}
+let manifest = null;
+window.addEventListener('message', (e) => {
+  const m = e.data; if (!m || m.source !== 'ct-plate') return;
+  if (m.type !== 'narration') log('in', m.type === 'ready' ? { type: 'ready', plate: m.plate, version: m.version, mics: m.manifest.mics.length, objectives: m.manifest.objectives.length } : m);
+  if (m.type === 'ready') { manifest = m.manifest; }
+  if (m.type === 'result' && pending.has(m.id)) { const p = pending.get(m.id); pending.delete(m.id); m.ok ? p.res(m.value) : p.rej(new Error(m.error)); }
+  if (m.type === 'narration') speak(m);
+  if (m.type === 'progress') { document.getElementById('prog').textContent = `${m.done.length}/${m.total}`; document.getElementById('bar').style.width = (100 * m.done.length / m.total) + '%'; }
+});
+
+// ---- Mr. Aly speaks every line the plate says ----
+const face = document.getElementById('face');
+function speak(m) {
+  document.getElementById('say-ar').textContent = m.ar; document.getElementById('say-en').textContent = m.en;
+  face.classList.add('talking'); clearTimeout(speak.t); speak.t = setTimeout(() => face.classList.remove('talking'), 600 + m.ar.length * 55);
+  if (document.getElementById('voice').checked && 'speechSynthesis' in window) {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(m.ar); u.lang = 'ar-EG'; u.rate = 0.95;
+    const v = speechSynthesis.getVoices().find((x) => x.lang && x.lang.startsWith('ar')); if (v) u.voice = v;
+    speechSynthesis.speak(u);
+  }
+}
+
+// ---- the guided lesson: what Mr. Aly does, step by step ----
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const STEPS = [
+  async () => { await send('selectMic', 'ldc'); await send('setView', 'studio'); await send('say', 'intro'); },
+  async () => { await send('setView', 'cutaway'); await wait(1500); await send('say', 'cutaway'); },
+  async () => { await send('setView', 'studio'); for (const d of ['omni', 'cardioid', 'supercardioid', 'hypercardioid', 'figure8']) { await send('setPattern', d); await send('say', d); await wait(3800); } await send('setPattern', 'cardioid'); },
+  async () => { await send('setView', 'field'); await send('placeSource', 'noise', 1.2, 90); await wait(1200); await send('say', 'nullHint'); await wait(2500); await send('rotateMic', -90); await wait(800); await send('say', 'nullHit'); },
+  async () => { await send('rotateMic', 0); await send('setView', 'studio'); await send('placeSource', 'voice', 1.0, 0); await wait(1500); await send('placeSource', 'voice', 0.05, 0); await send('say', 'proximity'); },
+  async () => { await send('setPattern', 'omni'); await send('say', 'omniClose'); },
+  async () => { await send('setPattern', 'cardioid'); for (const r of [0.25, 0.5, 1.0]) { await send('placeSource', 'voice', r, 0); await wait(2200); } await send('say', 'doubling'); },
+  async () => { for (const id of ['measure', 'dynamic', 'pencil', 'ribbon', 'shotgun', 'ldc']) { await send('selectMic', id); await wait(5200); } },
+  async () => { await send('setView', 'exploded'); await wait(1200); await send('say', 'exploded'); },
+];
+let step = 0, busy = false;
+const stepEl = document.getElementById('step'), nextBtn = document.getElementById('next');
+async function run() {
+  if (busy || step >= STEPS.length) return;
+  busy = true; nextBtn.disabled = true;
+  stepEl.textContent = `الخطوة ${step + 1} من ${STEPS.length}`;
+  try { await STEPS[step](); } catch (err) { log('in', { error: String(err.message || err) }); }
+  step++; busy = false; nextBtn.disabled = step >= STEPS.length;
+  if (step >= STEPS.length) stepEl.textContent = 'انتهى الشرح. الطالب يكمل المهام بنفسه.';
+}
+document.getElementById('start').addEventListener('click', async () => {
+  step = 0; await send('sound', true).catch(() => {}); run();
+});
+nextBtn.addEventListener('click', run);
+</script>
+</body>
+</html>
