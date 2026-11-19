@@ -1,0 +1,55 @@
+# =====================================================================
+#  plates.iconstudio.tech · Cinematic Tutor study plates
+#
+#  nginx downloads the plate files from github.com/ICONSTUDIOEG/ct-plates
+#  at a pinned commit on every start, then serves them. Routing follows
+#  preview.iconstudio.tech: shared Traefik network n8n_default, websecure
+#  entrypoint, mytlschallenge certificate resolver.
+#  To publish a new version: push to the repo, set REV below, redeploy.
+# =====================================================================
+services:
+  web:
+    image: nginx:alpine
+    container_name: ct-plates-web
+    restart: unless-stopped
+    environment:
+      REV: "2d23fa9451f2571148f4714447500ab8791b6a54"
+    networks:
+      - traefik-shared
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=n8n_default"
+      - "traefik.http.routers.ct-plates.rule=Host(`plates.iconstudio.tech`)"
+      - "traefik.http.routers.ct-plates.entrypoints=websecure"
+      - "traefik.http.routers.ct-plates.tls.certresolver=mytlschallenge"
+      - "traefik.http.services.ct-plates.loadbalancer.server.port=80"
+    command:
+      - sh
+      - -c
+      - |
+        set -e
+        H=/usr/share/nginx/html
+        B="https://raw.githubusercontent.com/ICONSTUDIOEG/ct-plates/$$REV"
+        rm -rf $$H/* && mkdir -p $$H/plate01
+        for f in index.html plate01/index.html plate01/host-demo.html plate01/INTEGRATION.md; do
+          wget -qO "$$H/$$f" "$$B/$$f"
+        done
+        cat > /etc/nginx/conf.d/default.conf <<'CONF'
+        server {
+          listen 80;
+          root /usr/share/nginx/html;
+          index index.html;
+          charset utf-8;
+          types { text/html html; text/plain md; }
+          add_header Permissions-Policy "microphone=(self)" always;
+          add_header Cache-Control "no-cache" always;
+          location / { try_files $$uri $$uri/ =404; }
+        }
+        CONF
+        echo "ct-plates $$REV ready"
+        exec nginx -g 'daemon off;'
+
+networks:
+  traefik-shared:
+    external: true
+    name: n8n_default
