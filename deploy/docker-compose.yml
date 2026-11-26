@@ -13,7 +13,7 @@ services:
     container_name: ct-plates-web
     restart: unless-stopped
     environment:
-      REV: "2d23fa9451f2571148f4714447500ab8791b6a54"
+      REV: "88689be0b8511a92a7c3a07947f4913e5294c800"
     networks:
       - traefik-shared
     labels:
