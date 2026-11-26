@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>الميكروفون · لوحة ٠١</title>
 <meta name="description" content="Cinematic Tutor · Plate 01 · the microphone. Interactive study plate, Arabic first.">
+<meta name="author" content="Prof. Dr. Ashraf Ahmed · أ.د. أشرف أحمد">
 <link rel="icon" href="data:,">
 <style>/* Cinematic Tutor · plate system
    Layout: a printed RTL sheet. Console column at the right, live model in the centre,
@@ -91,7 +92,7 @@ body {
 .runhead .plate-no em { color: var(--red); font-style: normal; font-family: var(--mono); }
 
 /* console */
-.console { grid-area: console; display: flex; flex-direction: column; gap: 7px; min-height: 0; padding-top: 10px; min-width: 0; }
+.console { grid-area: console; display: flex; flex-direction: column; gap: 7px; overflow-y: auto; overflow-x: hidden; scrollbar-width: thin; min-height: 0; padding-top: 10px; min-width: 0; }
 .kicker { font-size: 11px; letter-spacing: .04em; color: var(--ink-soft); }
 .kicker em { font-family: var(--gloss); }
 .title { margin: 0; line-height: .95; }
@@ -100,6 +101,10 @@ body {
 .title .en { display: block; font-family: var(--gloss); font-style: italic; font-weight: 400; font-size: 19px; color: var(--ink-soft); margin-top: 4px; }
 .deck { margin: 0; font-family: var(--display); font-size: 18px; line-height: 1.3; text-wrap: balance; }
 .deck .gloss { display: block; font-size: 13px; }
+.credit { margin: 0; font-size: 11px; line-height: 1.35; padding: 3px 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.credit b { font-weight: 600; color: var(--red); }
+.credit .gloss { display: block; font-size: 10px; }
+@media (min-width: 1361px) and (max-height: 960px) { .console { gap: 5px; } .controls { gap: 5px; } .title .ar { font-size: 54px; } .credit .gloss { display: none; } .lede { font-size: 11px; line-height: 1.5; } }
 .lede { margin: 0; font-size: 11.5px; line-height: 1.6; color: var(--ink); max-width: 46ch; }
 
 .controls { display: grid; gap: 7px; border-top: 1px solid var(--ink); padding-top: 7px; margin-top: auto; }
@@ -212,10 +217,18 @@ canvas.diazo { position: absolute; pointer-events: none; z-index: 1; }
 /* embedded / mid-size: still one sheet, narrower side columns */
 @media (min-width: 901px) and (max-width: 1360px) {
   .frame { grid-template-columns: 262px minmax(0, 1fr) 268px; grid-template-rows: 30px minmax(0, 1fr) 190px; column-gap: 12px; }
-  .title .ar { font-size: 54px; }
-  .lede { display: none; }
-  .knob-row { grid-template-columns: 92px minmax(0, 1fr); }
-  .knob { width: 92px; height: 92px; }
+  .title .ar { font-size: 46px; }
+  .lede, .kicker, .deck .gloss, .credit .gloss { display: none; }
+  .deck { font-size: 15px; }
+  .console { gap: 4px; }
+  .controls { gap: 5px; padding-top: 5px; }
+  .chip { line-height: 16px; }
+  .fader { height: 22px; }
+  .btn { line-height: 18px; }
+  .title .en { font-size: 15px; }
+  .detents button { line-height: 17px; }
+  .knob-row { grid-template-columns: 82px minmax(0, 1fr); }
+  .knob { width: 82px; height: 82px; }
   .strip { grid-template-columns: repeat(4, minmax(0, 1fr)) 280px; }
   .runhead > span:nth-child(2) { display: none; }
   .mic { grid-template-columns: 24px minmax(0, 1fr); padding: 2px 4px; gap: 3px; }
@@ -287,6 +300,7 @@ canvas.diazo { position: absolute; pointer-events: none; z-index: 1; }
       <div class="kicker">هندسة الصوت · الدرس الأول <em>Sound engineering · Lesson one</em></div>
       <h1 class="title"><span class="ar">الميكروفون</span><span class="en">The microphone</span></h1>
       <p class="deck">يسمع من الأمام، ويتجاهل ما خلفه.<span class="gloss">It hears the front and ignores the back.</span></p>
+      <p class="credit">إعداد <b>أ.د. أشرف أحمد</b> · رئيس قسم هندسة الصوت، المعهد العالي للسينما<span class="gloss">by Prof. Dr. Ashraf Ahmed · Head of Sound Engineering, Higher Institute of Cinema</span></p>
       <p class="lede">كل ميكروفون يقرر ماذا يسمع قبل أن يسجّل. في هذه الكبسولة غشاءان متقابلان، ومن مزج إشارتيهما يولد نمط الالتقاط: دائري، قلبي، أو على شكل ثمانية. اسحب المصادر، أدِر الميكروفون، واقترب لتسمع الفرق.</p>
 
       <div class="controls">
