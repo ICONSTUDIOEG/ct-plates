@@ -1,16 +1,18 @@
-# ct-plates · Cinematic Tutor study plates
+# Platō · بلاتوه
 
-**سينماتيك توتر · لوحات دراسية**
+**Study plates by Cinematic Tutor · لوحات دراسية من سينماتيك توتر**
+
+*Platō* plays on the film studio stage (بلاتوه, the word every Egyptian film student knows) and on *plate*, the printed study sheet each lesson is built as.
 
 Interactive lessons in sound and cinema, by ICON Studio for the Sound Engineering Department, Higher Institute of Cinema (Academy of Arts, Egypt).
 
 Each plate teaches one technical idea by letting the student operate it. Every plate is a live 3D model the student can turn, cut open and take apart, driven by a real physics simulation they can hear. It looks like a printed 1960s studio engineering sheet, in two inks, Arabic first with English glosses.
 
-**Live:** https://plates.iconstudio.tech
+**Live:** https://plato.iconstudio.tech
 
 | Plate | Subject | Link |
 |---|---|---|
-| 01 | The microphone · الميكروفون | https://plates.iconstudio.tech/plate01/ |
+| 01 | The microphone · الميكروفون | https://plato.iconstudio.tech/plate01/ |
 
 ---
 
@@ -76,13 +78,13 @@ Any current desktop or phone browser. No install, no login, no internet after th
 
 ### Microphone access
 
-"Try your voice" needs a secure page: **HTTPS**, `localhost`, or the file opened from disk. On `plates.iconstudio.tech` the browser asks for permission once. Where it is refused, the plate says so and carries on with the synthesised voice.
+"Try your voice" needs a secure page: **HTTPS**, `localhost`, or the file opened from disk. On `plato.iconstudio.tech` the browser asks for permission once. Where it is refused, the plate says so and carries on with the synthesised voice.
 
 ### Embed in another site or app
 
 ```html
 <iframe
-  src="https://plates.iconstudio.tech/plate01/?host=https://your-app.example"
+  src="https://plato.iconstudio.tech/plate01/?host=https://your-app.example"
   allow="microphone; autoplay"
   style="width:100%; aspect-ratio:16/10; border:0"
   title="Plate 01 · The microphone"></iframe>
@@ -95,14 +97,14 @@ The plate keeps its full sheet layout from about 900 px wide, and switches to a 
 Plates talk to their host with `postMessage`. The host can switch mics and views, move sources, show narration lines, and read state. The plate reports every narration line (so Mr. Aly can speak it), every teaching event, and the student's task progress.
 
 - Full API and URL parameters: [`plate01/INTEGRATION.md`](plate01/INTEGRATION.md)
-- Working reference host (Mr. Aly guides the lesson in nine steps): [`plate01/host-demo.html`](plate01/host-demo.html), live at https://plates.iconstudio.tech/plate01/host-demo.html
+- Working reference host (Mr. Aly guides the lesson in nine steps): [`plate01/host-demo.html`](plate01/host-demo.html), live at https://plato.iconstudio.tech/plate01/host-demo.html
 
 ---
 
 ## Repository layout
 
 ```
-index.html                  plates index (plates.iconstudio.tech)
+index.html                  plates index (plato.iconstudio.tech)
 plate01/index.html          Plate 01, the whole plate in one self-contained file (~1.3 MB)
 plate01/host-demo.html      Mr. Aly reference host
 plate01/INTEGRATION.md      integration guide for the Cinematic Tutor app
@@ -113,7 +115,8 @@ This repo holds the **built** plates only. The source (simulation, 3D models, pl
 
 ## Deployment
 
-`plates.iconstudio.tech` runs on the ICON Studio VPS as the Docker project **`plates`**:
+`plato.iconstudio.tech` runs on the ICON Studio VPS as the Docker project **`plates`**. The old address `plates.iconstudio.tech` permanently redirects to it.
+
 
 - An `nginx:alpine` container downloads this repo's files at a **pinned commit** on every start and serves them.
 - It sits behind the VPS's existing Traefik proxy (network `n8n_default`, resolver `mytlschallenge`), which provides HTTPS automatically.
@@ -125,7 +128,7 @@ This repo holds the **built** plates only. The source (simulation, 3D models, pl
 1. Commit and push the new files to `main`.
 2. In `deploy/docker-compose.yml`, set `REV` to the new commit hash and push.
 3. Redeploy the `plates` project on the VPS with that compose file. The container fetches the new files on start.
-4. Check `https://plates.iconstudio.tech/plate01/` loads, and that the served file matches the commit.
+4. Check `https://plato.iconstudio.tech/plate01/` loads, and that the served file matches the commit.
 
 ### Remove
 
