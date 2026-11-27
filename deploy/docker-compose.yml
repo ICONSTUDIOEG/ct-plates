@@ -1,5 +1,6 @@
 # =====================================================================
-#  plates.iconstudio.tech · Cinematic Tutor study plates
+#  plato.iconstudio.tech · Platō (بلاتوه), study plates by Cinematic Tutor
+#  plates.iconstudio.tech (the first address) redirects here permanently.
 #
 #  nginx downloads the plate files from github.com/ICONSTUDIOEG/ct-plates
 #  at a pinned commit on every start, then serves them. Routing follows
@@ -13,16 +14,25 @@ services:
     container_name: ct-plates-web
     restart: unless-stopped
     environment:
-      REV: "88689be0b8511a92a7c3a07947f4913e5294c800"
+      REV: "7ad31df2726ce5d28e2f2462758dd88d55b72e27"
     networks:
       - traefik-shared
     labels:
       - "traefik.enable=true"
       - "traefik.docker.network=n8n_default"
-      - "traefik.http.routers.ct-plates.rule=Host(`plates.iconstudio.tech`)"
+      - "traefik.http.routers.ct-plates.rule=Host(`plato.iconstudio.tech`)"
       - "traefik.http.routers.ct-plates.entrypoints=websecure"
       - "traefik.http.routers.ct-plates.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.ct-plates.service=ct-plates"
       - "traefik.http.services.ct-plates.loadbalancer.server.port=80"
+      - "traefik.http.routers.ct-plates-old.rule=Host(`plates.iconstudio.tech`)"
+      - "traefik.http.routers.ct-plates-old.entrypoints=websecure"
+      - "traefik.http.routers.ct-plates-old.tls.certresolver=mytlschallenge"
+      - "traefik.http.routers.ct-plates-old.service=ct-plates"
+      - "traefik.http.routers.ct-plates-old.middlewares=ct-plates-moved"
+      - "traefik.http.middlewares.ct-plates-moved.redirectregex.regex=^https://plates\\.iconstudio\\.tech/(.*)"
+      - "traefik.http.middlewares.ct-plates-moved.redirectregex.replacement=https://plato.iconstudio.tech/$${1}"
+      - "traefik.http.middlewares.ct-plates-moved.redirectregex.permanent=true"
     command:
       - sh
       - -c
